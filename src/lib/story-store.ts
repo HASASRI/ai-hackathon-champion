@@ -62,6 +62,7 @@ export function saveStory(story: Story) {
   const stored = readJson<Story[]>(STORIES_KEY, []).filter((s) => s.id !== story.id);
   persist(STORIES_KEY, [story, ...stored]);
   storiesCache = [DEMO_STORY, ...[story, ...stored].filter((s) => s.id !== DEMO_STORY.id)];
+  syncStoryToCloud(story);
 }
 
 export function getSessions(): StorySession[] {
@@ -76,6 +77,7 @@ export function saveSession(session: StorySession) {
   const next = [session, ...loadSessions().filter((s) => s.storyId !== session.storyId)];
   sessionsCache = next;
   persist(SESSIONS_KEY, next);
+  syncSessionToCloud(session);
 }
 
 // Cloud sync: localStorage stays the instant store; when a parent is signed
