@@ -2,7 +2,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, Output } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayRunIdFetch, getLovableAiGatewayRunId } from "./run-id";
-import type { Story, StoryChapter } from "../story-types";
+import type { Chapter, Story, StoryRequest } from "../story-types";
 
 // Server-only module: the gateway key and prompt never leave the server.
 
@@ -16,48 +16,42 @@ const checkpointSchema = z.object({
   question: z.string(),
   options: z.array(z.string()).length(4),
   correctIndex: z.number().int().min(0).max(3),
+  // Index of the wrong option that reveals the classic misconception.
+  misconceptionIndex: z.number().int().min(0).max(3),
+  misconception: z.string(),
   explanation: z.string(),
   reteach: z.string(),
 });
 
 const chapterSchema = z.object({
   title: z.string(),
-  content: z.string(),
+  text: z.string(),
   checkpoint: checkpointSchema.nullable(),
 });
 
 const storySchema = z.object({
   title: z.string(),
-  summary: z.string(),
-  estimatedMinutes: z.number().int().min(3).max(15),
   chapters: z.array(chapterSchema).min(3).max(5),
 });
 
-export interface GenerateStoryInput {
-  childName: string;
-  age: number;
-  subject: string;
-  topic: string;
-}
-
-function buildPrompt(input: GenerateStoryInput): string {
+function buildPrompt(request: StoryRequest): string {
+  const chapterCount = request.length === "Short" ? 3 : request.length === "Long" ? 5 : 4;
   return [
-    `Write an interactive learning story for ${input.childName}, age ${input.age}.`,
-    `Subject: ${input.subject}. Topic to teach: ${input.topic}.`,
+    `Write an interactive learning story for a child age ${request.age}.`,
+    `Topic to teach: ${request.topic}. Story world: ${request.world}. Difficulty: ${request.difficulty}.`,
     `Requirements:`,
-    `- 4 chapters. Chapters 1-3 each end with a checkpoint quiz about ONE core concept of the topic; chapter 4 is the finale with checkpoint: null.`,
-    `- Story first: a vivid adventure where the hero must USE the concept to progress. Age-appropriate vocabulary for age ${input.age}.`,
-    `- Each chapter's content is 3-5 short paragraphs separated by blank lines.`,
+    `- Exactly ${chapterCount} chapters. All chapters except the finale end with a checkpoint quiz about ONE core concept of the topic; the finale's checkpoint is null.`,
+    `- Story first: a vivid adventure in the ${request.world} world where the hero must USE the concept to progress. Vocabulary suited to age ${request.age}, difficulty "${request.difficulty}".`,
+    `- Each chapter's text is 3-5 short paragraphs separated by blank lines.`,
     `- Each checkpoint: a clear question, exactly 4 options, correctIndex (0-3), a short encouraging explanation of the right answer, and a "reteach" text that re-explains the concept a different, simpler way (shown when the child answers wrong).`,
-    `- The single most common wrong option should reflect the classic misconception about that concept.`,
-    `- estimatedMinutes: realistic reading time for the age group.`,
+    `- misconceptionIndex points at the wrong option that reflects the classic misconception about the concept; misconception names that misconception in one sentence for the parent report.`,
     `- Keep everything safe, warm, and encouraging for children. No violence, no scary content.`,
   ].join("\n");
 }
 
 export async function generateStoryWithAi(
   request: Request,
-  input: GenerateStoryInput,
+  input: StoryRequest,
 ): Promise<Story> {
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("AI key not configured");
@@ -90,22 +84,36 @@ export async function generateStoryWithAi(
   if (!generated) throw new Error("AI returned no story");
 
   const storyId = `story-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const chapters: StoryChapter[] = generated.chapters.map((c, i) => ({
-    id: `${storyId}-ch${i + 1}`,
+  const chapters: Chapter[] = generated.chapters.map((c, i) => ({
     title: c.title,
-    content: c.content,
-    ...(c.checkpoint ? { checkpoint: c.checkpoint } : {}),
+    text: c.text,
+    ...(c.checkpoint
+      ? {
+          checkpoint: {
+            concept: c.checkpoint.concept,
+            question: c.checkpoint.question,
+            options: c.checkpoint.options.map((text, oi) => ({
+              id: `${storyId}-ch${i + 1}-opt${oi + 1}`,
+              text,
+              isCorrect: oi === c.checkpoint!.correctIndex,
+              ...(oi === c.checkpoint!.misconceptionIndex && oi !== c.checkpoint!.correctIndex
+                ? { misconception: c.checkpoint!.misconception }
+                : {}),
+            })),
+            explanation: c.checkpoint.explanation,
+            reteach: c.checkpoint.reteach,
+          },
+        }
+      : {}),
   }));
 
   return {
     id: storyId,
     title: generated.title,
-    summary: generated.summary,
-    childName: input.childName,
-    age: input.age,
-    subject: input.subject,
     topic: input.topic,
-    estimatedMinutes: generated.estimatedMinutes,
+    world: input.world,
+    difficulty: input.difficulty,
+    age: input.age,
     chapters,
     createdAt: new Date().toISOString(),
     source: "ai",

@@ -1,12 +1,21 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
+import {
+  DIFFICULTIES,
+  MAX_AGE,
+  MAX_TOPIC_LENGTH,
+  MIN_AGE,
+  STORY_LENGTHS,
+  STORY_WORLDS,
+} from "./story-types";
 
 const inputSchema = z.object({
-  childName: z.string().trim().min(1).max(40),
-  age: z.number().int().min(6).max(12),
-  subject: z.string().trim().min(1).max(60),
-  topic: z.string().trim().min(2).max(120),
+  age: z.number().int().min(MIN_AGE).max(MAX_AGE),
+  topic: z.string().trim().min(2).max(MAX_TOPIC_LENGTH),
+  world: z.enum(STORY_WORLDS),
+  difficulty: z.enum(DIFFICULTIES),
+  length: z.enum(STORY_LENGTHS),
 });
 
 export const generateStory = createServerFn({ method: "POST" })
