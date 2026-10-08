@@ -104,7 +104,7 @@ export function syncStoryToCloud(story: Story) {
       world: story.world,
       difficulty: story.difficulty,
       age: story.age,
-      chapters: story.chapters,
+      chapters: toJson(story.chapters),
       source: story.source,
     });
   });
@@ -117,7 +117,7 @@ export function syncSessionToCloud(session: StorySession) {
       {
         user_id: uid,
         story_id: session.storyId,
-        answers: session.answers,
+        answers: toJson(session.answers),
         xp: session.xp,
         started_at: session.startedAt,
         completed_at: session.completedAt ?? null,
