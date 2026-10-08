@@ -1,4 +1,8 @@
 import type { Story } from "./story-types";
+import ch1 from "@/assets/demo-ch1.jpg";
+import ch2 from "@/assets/demo-ch2.jpg";
+import ch3 from "@/assets/demo-ch3.jpg";
+import ch4 from "@/assets/demo-ch4.jpg";
 
 // Pre-written adaptive demo story — the app demos with zero AI dependency.
 export const DEMO_STORY: Story = {
@@ -13,6 +17,7 @@ export const DEMO_STORY: Story = {
   chapters: [
     {
       title: "The Map in the Attic",
+      imageUrl: ch1,
       text: "Mira found the map tucked inside her grandfather's old climbing journal. It showed the Fraction Peaks — three mountains shaped like giant slices of pie. \"Whoever reaches the summit,\" the note said, \"must understand that every whole can be split into equal parts.\" Mira packed her rope, her compass, and a snack cut exactly in half.",
       checkpoint: {
         concept: "Fractions as equal parts",
@@ -39,6 +44,7 @@ export const DEMO_STORY: Story = {
     },
     {
       title: "The Cracked Bridge",
+      imageUrl: ch2,
       text: "At the first peak, a cracked bridge spanned a deep chasm. Each plank was a fraction of the whole crossing. A carved sign read: \"Lay down exactly one whole to cross safely.\" Mira's pack held three planks: a half-plank, a quarter-plank, and a third-plank. The wind howled. She could only carry two across.",
       checkpoint: {
         concept: "Adding fractions to make a whole",
@@ -65,6 +71,7 @@ export const DEMO_STORY: Story = {
     },
     {
       title: "The Summit Flag",
+      imageUrl: ch3,
       text: "Near the summit, Mira found the flag pole — but the rope to raise the flag was missing a section. The instructions said: \"The rope must be ¾ of the pole's height. You already have ½.\" Mira smiled. She knew exactly which spare piece to cut from her climbing rope.",
       checkpoint: {
         concept: "Comparing and combining fractions",
@@ -91,6 +98,7 @@ export const DEMO_STORY: Story = {
     },
     {
       title: "The Way Down",
+      imageUrl: ch4,
       text: "With the flag flying over the Fraction Peaks, Mira opened her journal and wrote: \"A fraction is just a fair way to share. Equal parts, honest counting, and a little courage.\" She took one last look at the three pie-slice mountains, then started the long, happy climb down — already wondering what the next map would ask of her.",
     },
   ],

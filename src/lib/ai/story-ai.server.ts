@@ -26,11 +26,13 @@ const checkpointSchema = z.object({
 const chapterSchema = z.object({
   title: z.string(),
   text: z.string(),
+  imagePrompt: z.string(),
   checkpoint: checkpointSchema.nullable(),
 });
 
 const storySchema = z.object({
   title: z.string(),
+  characterSheet: z.string(),
   chapters: z.array(chapterSchema).min(3).max(5),
 });
 
@@ -45,6 +47,9 @@ function buildPrompt(request: StoryRequest): string {
     `- Each chapter's text is 3-5 short paragraphs separated by blank lines.`,
     `- Each checkpoint: a clear question, exactly 4 options, correctIndex (0-3), a short encouraging explanation of the right answer, and a "reteach" text that re-explains the concept a different, simpler way (shown when the child answers wrong).`,
     `- misconceptionIndex points at the wrong option that reflects the classic misconception about the concept; misconception names that misconception in one sentence for the parent report.`,
+    `- characterSheet: one paragraph fixing the exact look of the hero and recurring characters (name, age, hair, skin, clothing colors, distinctive items) so illustrations stay consistent.`,
+    `- Each chapter's imagePrompt: one sentence describing the key scene to illustrate, showing the learning concept visually (e.g. a pizza cut into 4 equal slices for fractions; clouds, rain and sun for the water cycle). Name characters, don't redescribe them.`,
+    `- Put character dialogue in double quotes inside the text.`,
     `- Keep everything safe, warm, and encouraging for children. No violence, no scary content.`,
   ].join("\n");
 }
@@ -87,6 +92,7 @@ export async function generateStoryWithAi(
   const chapters: Chapter[] = generated.chapters.map((c, i) => ({
     title: c.title,
     text: c.text,
+    imagePrompt: c.imagePrompt,
     ...(c.checkpoint
       ? {
           checkpoint: {
@@ -117,5 +123,6 @@ export async function generateStoryWithAi(
     chapters,
     createdAt: new Date().toISOString(),
     source: "ai",
+    characterSheet: generated.characterSheet,
   };
 }
