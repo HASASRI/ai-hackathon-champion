@@ -117,3 +117,14 @@
 @utility shadow-brutal-flame {
   box-shadow: 12px 12px 0 0 var(--flame);
 }
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateX(24px) rotate(0.5deg); }
+  to { opacity: 1; transform: none; }
+}
+@utility animate-fade-in {
+  animation: page-in 0.45s ease-out both;
+}
+@utility animate-page {
+  animation: page-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}

@@ -13,15 +13,27 @@ const NAV_LINKS = [
 export function SiteHeader() {
   const navigate = useNavigate();
   const [signedIn, setSignedIn] = useState(false);
+  const [avatar, setAvatar] = useState("🦊");
 
   useEffect(() => {
-    void supabase.auth.getUser().then(({ data }) => setSignedIn(!!data.user));
+    const loadAvatar = () =>
+      void supabase.auth.getUser().then(async ({ data }) => {
+        setSignedIn(!!data.user);
+        if (!data.user) return;
+        const { data: row } = await supabase.from("profiles").select("avatar").eq("id", data.user.id).maybeSingle();
+        if (row?.avatar) setAvatar(row.avatar);
+      });
+    loadAvatar();
+    window.addEventListener("profile-updated", loadAvatar);
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       setSignedIn(!!session?.user);
       if (event === "SIGNED_IN") void loadCloudData();
     });
     void loadCloudData();
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      sub.subscription.unsubscribe();
+      window.removeEventListener("profile-updated", loadAvatar);
+    };
   }, []);
 
   async function handleSignOut() {
@@ -51,6 +63,15 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-3">
+          {signedIn && (
+            <Link
+              to="/profile"
+              aria-label="My profile"
+              className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink bg-sky/15 text-xl transition-transform hover:scale-110"
+            >
+              {avatar}
+            </Link>
+          )}
           {signedIn ? (
             <button
               type="button"
