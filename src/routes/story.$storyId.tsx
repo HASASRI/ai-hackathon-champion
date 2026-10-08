@@ -42,7 +42,7 @@ function StoryPlayer() {
       let current = story;
       for (let i = missing; i < current.chapters.length; i++) {
         const ch = current.chapters[i];
-        if (ch.imageUrl || !ch.imagePrompt) continue;
+        if (!ch || ch.imageUrl || !ch.imagePrompt) continue;
         setPainting(i);
         try {
           const { url } = await generateChapterImage({

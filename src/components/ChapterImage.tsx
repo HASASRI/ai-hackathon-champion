@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 // Large storybook illustration with a styled placeholder — never a broken image.
-export function ChapterImage({ src, alt, loading }: { src?: string; alt: string; loading?: boolean }) {
+export function ChapterImage({ src, alt, loading }: { src?: string | undefined; alt: string; loading?: boolean }) {
   const [failed, setFailed] = useState(false);
   const show = src && !failed;
   return (
