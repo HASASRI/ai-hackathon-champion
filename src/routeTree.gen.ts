@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreateRouteImport } from './routes/create'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as StoriesRouteImport } from './routes/stories'
 import { Route as StoryStoryIdRouteImport } from './routes/story.$storyId'
@@ -37,6 +38,11 @@ const CreateRoute = CreateRouteImport.update({
   path: '/create',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
+  '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/stories': typeof StoriesRoute
   '/story/$storyId': typeof StoryStoryIdRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
+  '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/stories': typeof StoriesRoute
   '/story/$storyId': typeof StoryStoryIdRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
+  '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/stories': typeof StoriesRoute
   '/story/$storyId': typeof StoryStoryIdRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/create'
+    | '/profile'
     | '/report'
     | '/stories'
     | '/story/$storyId'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/create'
+    | '/profile'
     | '/report'
     | '/stories'
     | '/story/$storyId'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/create'
+    | '/profile'
     | '/report'
     | '/stories'
     | '/story/$storyId'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   CreateRoute: typeof CreateRoute
+  ProfileRoute: typeof ProfileRoute
   ReportRoute: typeof ReportRoute
   StoriesRoute: typeof StoriesRoute
   StoryStoryIdRoute: typeof StoryStoryIdRoute
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/report': {
       id: '/report'
       path: '/report'
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   CreateRoute: CreateRoute,
+  ProfileRoute: ProfileRoute,
   ReportRoute: ReportRoute,
   StoriesRoute: StoriesRoute,
   StoryStoryIdRoute: StoryStoryIdRoute,

@@ -51,6 +51,10 @@ export interface Chapter {
   title: string;
   text: string;
   checkpoint?: Checkpoint;
+  // Scene description used to illustrate this chapter.
+  imagePrompt?: string;
+  // Saved illustration — generated once, then reused.
+  imageUrl?: string;
 }
 
 export interface Story {
@@ -63,6 +67,8 @@ export interface Story {
   chapters: Chapter[];
   createdAt: string;
   source: "demo" | "ai";
+  // Shared look of the cast + art style so every chapter image matches.
+  characterSheet?: string;
 }
 
 export interface AnswerRecord {

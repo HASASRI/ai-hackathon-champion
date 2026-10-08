@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { getStory, saveSession, getSession } from "../lib/story-store";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { saveSession, getSession, saveStory, useStories } from "../lib/story-store";
+import { generateChapterImage } from "../lib/story.functions";
+import { ChapterImage } from "../components/ChapterImage";
 import { adaptAfterAnswer } from "../lib/adaptive";
 import {
   XP_COMPLETION_BONUS,
@@ -25,7 +27,45 @@ type Phase = "reading" | "checkpoint" | "reteach" | "feedback" | "finished";
 
 function StoryPlayer() {
   const { storyId } = useParams({ from: "/story/$storyId" });
-  const story = getStory(storyId);
+  const story = useStories().find((s) => s.id === storyId);
+  const [painting, setPainting] = useState<number | null>(null);
+  const paintingRef = useRef(false);
+
+  // Fill in missing chapter illustrations once; saved URLs are reused afterwards.
+  useEffect(() => {
+    if (!story || paintingRef.current) return;
+    const missing = story.chapters.findIndex((c) => !c.imageUrl && c.imagePrompt);
+    if (missing < 0) return;
+    paintingRef.current = true;
+    setPainting(missing);
+    void (async () => {
+      let current = story;
+      for (let i = missing; i < current.chapters.length; i++) {
+        const ch = current.chapters[i];
+        if (!ch || ch.imageUrl || !ch.imagePrompt) continue;
+        setPainting(i);
+        try {
+          const { url } = await generateChapterImage({
+            data: {
+              storyId: current.id,
+              chapterIndex: i,
+              scene: ch.imagePrompt,
+              characterSheet: current.characterSheet ?? "",
+              topic: current.topic,
+            },
+          });
+          current = {
+            ...current,
+            chapters: current.chapters.map((c, ci) => (ci === i ? { ...c, imageUrl: url } : c)),
+          };
+          saveStory(current);
+        } catch {
+          // Placeholder stays; try again next visit.
+        }
+      }
+      setPainting(null);
+    })();
+  }, [story]);
 
   const [chapterIndex, setChapterIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("reading");
@@ -109,7 +149,7 @@ function StoryPlayer() {
   const progressPct = Math.round(((chapterIndex + 1) / totalChapters) * 100);
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12">
+    <div className="mx-auto max-w-6xl px-6 py-12">
       {/* Progress header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -159,15 +199,35 @@ function StoryPlayer() {
           </div>
         </div>
       ) : (
-        <div className="mt-8 grid items-start gap-6 lg:grid-cols-3">
+        <div key={chapterIndex} className="mt-8 animate-page grid items-start gap-6 lg:grid-cols-5">
+          <div className="lg:col-span-3">
+            <ChapterImage
+              src={chapter.imageUrl}
+              alt={`Illustration: ${chapter.title}`}
+              loading={painting === chapterIndex}
+            />
+          </div>
           {/* Story text */}
           <div className="border-2 border-ink bg-white p-6 lg:col-span-2">
             <span className="text-[11px] font-bold uppercase tracking-widest text-ink/50">
-              {chapter.title}
+              Chapter {chapterIndex + 1}
             </span>
-            <p className="mt-4 font-display text-xl font-bold leading-snug sm:text-2xl">
-              {phase === "reteach" && checkpoint ? checkpoint.reteach : chapter.text}
-            </p>
+            <h2 className="mt-1 font-display text-2xl font-extrabold uppercase">{chapter.title}</h2>
+            <div className="mt-4 space-y-3 text-lg font-medium leading-relaxed">
+              {(phase === "reteach" && checkpoint ? checkpoint.reteach : chapter.text)
+                .split(/\n\s*\n/)
+                .map((para, pi) => (
+                  <p key={pi}>
+                    {para.split(/("[^"]+"|“[^”]+”)/).map((part, k) =>
+                      /^["“]/.test(part) ? (
+                        <span key={k} className="font-display font-bold text-sky">{part}</span>
+                      ) : (
+                        part
+                      ),
+                    )}
+                  </p>
+                ))}
+            </div>
             {phase === "reteach" && (
               <p className="mt-4 border-l-4 border-sky bg-sky/10 p-3 text-sm font-semibold text-ink/70">
                 The story noticed you found this tricky — so it's explaining{" "}
@@ -205,7 +265,8 @@ function StoryPlayer() {
           </div>
 
           {/* Checkpoint panel */}
-          <div className="border-2 border-ink bg-white p-6">
+          {checkpoint && phase !== "reading" && (
+          <div className="border-2 border-ink bg-white p-6 lg:col-span-5">
             <p className="font-display text-lg font-extrabold uppercase">Checkpoint</p>
             <p className="mt-1 text-sm font-medium text-ink/60">
               {checkpoint ? checkpoint.concept : "No checkpoint in this chapter"}
@@ -245,12 +306,8 @@ function StoryPlayer() {
               </>
             )}
 
-            {phase === "reading" && checkpoint && (
-              <p className="mt-4 text-sm font-semibold text-ink/50">
-                Read the chapter, then face the checkpoint to earn XP.
-              </p>
-            )}
           </div>
+          )}
         </div>
       )}
     </div>

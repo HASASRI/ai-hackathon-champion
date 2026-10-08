@@ -24,3 +24,18 @@ export const generateStory = createServerFn({ method: "POST" })
     const { generateStoryWithAi } = await import("./ai/story-ai.server");
     return generateStoryWithAi(getRequest(), data);
   });
+
+const imageSchema = z.object({
+  storyId: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/),
+  chapterIndex: z.number().int().min(0).max(9),
+  scene: z.string().trim().min(3).max(1000),
+  characterSheet: z.string().max(2000),
+  topic: z.string().max(MAX_TOPIC_LENGTH),
+});
+
+export const generateChapterImage = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => imageSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { generateChapterImageFile } = await import("./ai/story-image.server");
+    return { url: await generateChapterImageFile(data) };
+  });
