@@ -94,6 +94,10 @@ function StoryPlayer() {
 
   function advance() {
     if (chapterIndex >= totalChapters - 1) {
+      // Final chapter may have no checkpoint — record completion here.
+      const finalXp = xp + XP_COMPLETION_BONUS;
+      setXp(finalXp);
+      persistSession(answers, finalXp, true);
       setPhase("finished");
       return;
     }
