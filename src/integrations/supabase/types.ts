@@ -14,7 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      stories: {
+        Row: {
+          age: number
+          chapters: Json
+          created_at: string
+          difficulty: string
+          id: string
+          source: string
+          title: string
+          topic: string
+          user_id: string
+          world: string
+        }
+        Insert: {
+          age: number
+          chapters: Json
+          created_at?: string
+          difficulty: string
+          id: string
+          source?: string
+          title: string
+          topic: string
+          user_id: string
+          world: string
+        }
+        Update: {
+          age?: number
+          chapters?: Json
+          created_at?: string
+          difficulty?: string
+          id?: string
+          source?: string
+          title?: string
+          topic?: string
+          user_id?: string
+          world?: string
+        }
+        Relationships: []
+      }
+      story_sessions: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          id: string
+          started_at: string
+          story_id: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          answers?: Json
+          completed_at?: string | null
+          id?: string
+          started_at?: string
+          story_id: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          id?: string
+          started_at?: string
+          story_id?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
