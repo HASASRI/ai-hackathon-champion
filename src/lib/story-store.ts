@@ -57,10 +57,14 @@ export function saveSession(session: StorySession) {
   writeJson(SESSIONS_KEY, [session, ...sessions]);
 }
 
+// Stable server snapshots — useSyncExternalStore loops if these change identity.
+const SERVER_STORIES: Story[] = [DEMO_STORY];
+const SERVER_SESSIONS: StorySession[] = [];
+
 export function useStories(): Story[] {
-  return useSyncExternalStore(subscribe, getStories, () => [DEMO_STORY]);
+  return useSyncExternalStore(subscribe, getStories, () => SERVER_STORIES);
 }
 
 export function useSessions(): StorySession[] {
-  return useSyncExternalStore(subscribe, getSessions, () => []);
+  return useSyncExternalStore(subscribe, getSessions, () => SERVER_SESSIONS);
 }
