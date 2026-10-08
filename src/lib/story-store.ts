@@ -2,6 +2,11 @@ import { useSyncExternalStore } from "react";
 import type { Story, StorySession } from "./story-types";
 import { DEMO_STORY } from "./demo-story";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
+
+function toJson(value: unknown): Json {
+  return value as unknown as Json;
+}
 
 // Local in-browser store for stories and sessions (Phase 2).
 // Phase 4 replaces persistence with Lovable Cloud tables.
