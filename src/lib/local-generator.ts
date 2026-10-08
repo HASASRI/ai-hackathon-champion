@@ -48,6 +48,7 @@ export function buildLocalStory(request: StoryRequest): Story {
             explanation: `Exactly — real understanding of ${topic} means you can explain each step.`,
             reteach: `Let's pause. ${topic} makes more sense when you break it into small steps. Ask yourself: what do I know already, and what is the very next small step? That's how ${setting.hero} solves every puzzle.`,
           },
+          }),
     };
   });
 

@@ -62,7 +62,7 @@ function StoryPlayer() {
       answers: finalAnswers,
       xp: finalXp,
       startedAt: getSession(story!.id)?.startedAt ?? startedAt,
-      completedAt: done ? new Date().toISOString() : undefined,
+      ...(done ? { completedAt: new Date().toISOString() } : {}),
     });
   }
 
@@ -73,7 +73,7 @@ function StoryPlayer() {
       chapterIndex,
       concept: checkpoint.concept,
       correct: option.isCorrect,
-      misconception: option.misconception,
+      ...(option.misconception ? { misconception: option.misconception } : {}),
     };
     const nextAnswers = [...answers, record];
     const nextXp = option.isCorrect ? xp + XP_PER_CORRECT : xp;
