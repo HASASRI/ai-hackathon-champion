@@ -140,7 +140,7 @@ export async function loadCloudData() {
       world: row.world as Story["world"],
       difficulty: row.difficulty as Story["difficulty"],
       age: row.age,
-      chapters: row.chapters as Story["chapters"],
+      chapters: row.chapters as unknown as Story["chapters"],
       createdAt: row.created_at,
       source: (row.source === "demo" ? "demo" : "ai") as Story["source"],
     }));
@@ -153,7 +153,7 @@ export async function loadCloudData() {
   if (cloudSessions?.length) {
     const mapped: StorySession[] = cloudSessions.map((row) => ({
       storyId: row.story_id,
-      answers: row.answers as StorySession["answers"],
+      answers: row.answers as unknown as StorySession["answers"],
       xp: row.xp,
       startedAt: row.started_at,
       ...(row.completed_at ? { completedAt: row.completed_at } : {}),
