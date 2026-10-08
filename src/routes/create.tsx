@@ -14,6 +14,7 @@ import {
 import { validateStoryRequest } from "../lib/validation";
 import { buildLocalStory } from "../lib/local-generator";
 import { saveStory } from "../lib/story-store";
+import { generateStory } from "../lib/story.functions";
 
 export const Route = createFileRoute("/create")({
   head: () => ({
@@ -63,7 +64,7 @@ function CreateStory() {
   const [errors, setErrors] = useState<string[]>([]);
   const [building, setBuilding] = useState(false);
 
-  function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     const request = { age, topic, world, difficulty, length };
     const result = validateStoryRequest(request);
@@ -73,10 +74,16 @@ function CreateStory() {
     }
     setErrors([]);
     setBuilding(true);
-    // Local generation (AI generation arrives in Phase 3).
-    const story = buildLocalStory(request);
-    saveStory(story);
-    navigate({ to: "/story/$storyId", params: { storyId: story.id } });
+    try {
+      // Live AI generation; fall back to the local builder if it fails.
+      const story = await generateStory({ data: request });
+      saveStory(story);
+      navigate({ to: "/story/$storyId", params: { storyId: story.id } });
+    } catch {
+      const story = buildLocalStory(request);
+      saveStory(story);
+      navigate({ to: "/story/$storyId", params: { storyId: story.id } });
+    }
   }
 
   return (
