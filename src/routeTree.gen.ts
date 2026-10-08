@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as StoriesRouteImport } from './routes/stories'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreateRoute = CreateRouteImport.update({
@@ -50,6 +56,7 @@ const StoryStoryIdRoute = StoryStoryIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
   '/report': typeof ReportRoute
   '/stories': typeof StoriesRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
   '/report': typeof ReportRoute
   '/stories': typeof StoriesRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
   '/report': typeof ReportRoute
   '/stories': typeof StoriesRoute
@@ -75,13 +84,27 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/about' | '/create' | '/report' | '/stories' | '/story/$storyId'
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/create'
+    | '/report'
+    | '/stories'
+    | '/story/$storyId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/create' | '/report' | '/stories' | '/story/$storyId'
+  to:
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/create'
+    | '/report'
+    | '/stories'
+    | '/story/$storyId'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/auth'
     | '/create'
     | '/report'
     | '/stories'
@@ -91,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AuthRoute: typeof AuthRoute
   CreateRoute: typeof CreateRoute
   ReportRoute: typeof ReportRoute
   StoriesRoute: typeof StoriesRoute
@@ -111,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/create': {
@@ -147,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AuthRoute: AuthRoute,
   CreateRoute: CreateRoute,
   ReportRoute: ReportRoute,
   StoriesRoute: StoriesRoute,
