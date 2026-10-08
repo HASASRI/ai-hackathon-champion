@@ -8,7 +8,7 @@ export type Adaptation =
 
 export function adaptAfterAnswer(correct: boolean, concept: string, misconception?: string): Adaptation {
   if (correct) return { kind: "advance" };
-  return { kind: "reteach", concept, misconception };
+  return { kind: "reteach", concept, ...(misconception ? { misconception } : {}) };
 }
 
 export interface ConceptMastery {

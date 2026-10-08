@@ -13,7 +13,7 @@ const WORLD_SETTINGS: Record<string, { hero: string; place: string; guide: strin
 };
 
 export function buildLocalStory(request: StoryRequest): Story {
-  const setting = WORLD_SETTINGS[request.world] ?? WORLD_SETTINGS["Enchanted Forest"];
+  const setting = WORLD_SETTINGS[request.world] ?? WORLD_SETTINGS["Enchanted Forest"]!;
   const topic = request.topic.trim();
   const chapters = request.length === "Short" ? 3 : request.length === "Medium" ? 4 : 5;
 
@@ -24,9 +24,10 @@ export function buildLocalStory(request: StoryRequest): Story {
       text: isLast
         ? `${setting.hero} looked back at ${setting.place} and smiled. Every puzzle about ${topic} had been solved — not by luck, but by understanding. ${setting.guide} nodded proudly. "You didn't just finish the quest," they said. "You learned it."`
         : `${setting.hero} set out across ${setting.place}, where a new puzzle about ${topic} waited. ${setting.guide} appeared with a twinkle. "To pass this point, you must truly understand ${topic}," they said. "Not guess — understand."`,
-      checkpoint: isLast
-        ? undefined
+      ...(isLast
+        ? {}
         : {
+            checkpoint: {
             concept: topic,
             question: `Quick check, adventurer: what is the most important thing about ${topic}?`,
             options: [
